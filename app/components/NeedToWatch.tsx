@@ -27,8 +27,18 @@ export default function NeedToWatch() {
   }, [queue])
 
   const extractId = (url: string) => {
-    const match = url.match(/[?&]v=([^#&?]*)/) || url.match(/youtu\.be\/([^#&?]*)/)
-    return match ? match[1] : null
+    url = url.trim()
+    const vMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+    if (vMatch) return vMatch[1]
+    const patterns = [
+      /(?:v\/|vi\/|shorts\/|embed\/|youtu\.be\/|be\/|v=)([a-zA-Z0-9_-]{11})/,
+      /([a-zA-Z0-9_-]{11})/
+    ]
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match && match[1]) return match[1]
+    }
+    return null
   }
 
   const addToQueue = async (e: React.FormEvent) => {

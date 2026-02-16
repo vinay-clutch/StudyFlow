@@ -76,18 +76,18 @@ export default function DashboardPage() {
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, i) => (
-              <div key={i} className="group relative rounded-2xl border border-white/10 bg-[#090909] p-6 transition-all hover:border-white/20 hover:bg-[#111]">
+              <div key={i} className="group relative glass-card !p-6 hover:border-indigo-500/30">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{stat.label}</p>
-                    <p className="mt-2 text-3xl font-bold text-white">{stat.value}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{stat.label}</p>
+                    <p className="mt-2 text-3xl font-black text-white font-outfit">{stat.value}</p>
                   </div>
                   <div className={`rounded-xl bg-white/5 p-2.5 ${stat.color} transition-colors group-hover:bg-white/10`}>
                     <stat.icon size={20} />
                   </div>
                 </div>
                 {/* Subtle bottom accent */}
-                <div className="absolute bottom-0 left-0 h-1 w-0 bg-blue-600 transition-all group-hover:w-full" />
+                <div className="absolute bottom-0 left-0 h-1 w-0 bg-indigo-600 transition-all group-hover:w-full" />
               </div>
             ))}
           </div>

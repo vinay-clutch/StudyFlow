@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState, useEffect } from 'react'
-import { GraduationCap, LogIn, LogOut, User } from 'lucide-react'
+import { LogIn, User, Search, GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type NavbarVariant = 'default' | 'minimal'
@@ -86,34 +86,30 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-lg">
-      <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-3">
+    <nav className="fixed left-0 right-0 top-0 z-[100] border-b border-white/5 bg-black/60 backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-7xl items-center px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-            <GraduationCap className="h-6 w-6 text-white" />
+        <Link href="/" className="flex items-center gap-3 transition-transform hover:scale-105 active:scale-95">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.4)]">
+            <span className="text-xl font-black text-white">S</span>
           </div>
-          <span className="bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
-            StudyFlow
-          </span>
+          <span className="text-xl font-black text-white tracking-tighter font-outfit">StudyFlow.</span>
         </Link>
 
-        {/* Center search (hidden on minimal) */}
-        {!isMinimal && (
-          <form
-            onSubmit={handleSearch}
-            className="hidden flex-1 items-center justify-center md:flex"
-          >
-            <div className="w-full max-w-xl">
-              <input
+        {/* Dynamic Search - Only visible after sign-in */}
+        {user && (
+          <div className="ml-12 hidden md:block">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+              <input 
                 type="text"
-                placeholder="Search your roadmaps..."
+                placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-gray-600 outline-none focus:border-blue-500 transition-all focus:ring-1 focus:ring-blue-500"
+                className="w-80 rounded-2xl border border-white/5 bg-white/[0.03] py-2.5 pl-12 pr-4 text-sm text-white placeholder:text-gray-700 outline-none focus:border-indigo-500/50 transition-all focus:bg-white/[0.06]"
               />
             </div>
-          </form>
+          </div>
         )}
 
         {/* Right side user/avatar */}
@@ -152,14 +148,15 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
                   Sign Out
                 </button>
               </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold text-indigo-400 shadow-xl shadow-indigo-500/10 transition-transform hover:scale-105">
-                {user.email?.[0].toUpperCase() ?? <User size={18} />}
+              <div className="group relative">
+                <div className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold text-indigo-400 shadow-xl shadow-indigo-500/10 transition-transform hover:scale-105">
+                  {user.email?.[0].toUpperCase() ?? <User size={18} />}
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
-    </header>
+    </nav>
   )
 }
-

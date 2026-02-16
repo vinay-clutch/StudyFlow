@@ -12,15 +12,20 @@ interface AddVideoModalProps {
 
 function extractVideoId(url: string): string | null {
   url = url.trim()
-  // Handle shorts, standard watch, youtu.be, embed, and playlist-style links
+  
+  // Try to find 'v=' parameter first as it's the most reliable for specific videos in playlists
+  const vMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  if (vMatch) return vMatch[1]
+
+  // Handle other variants: shorts, embed, youtu.be
   const patterns = [
-    /[?&]v=([^#&?]*)/,
-    /(?:v=|v\/|vi=|vi\/|shorts\/|embed\/|youtu\.be\/|be\/)([^#&?]*)/,
+    /(?:v\/|vi\/|shorts\/|embed\/|youtu\.be\/|be\/|v=)([a-zA-Z0-9_-]{11})/,
     /([a-zA-Z0-9_-]{11})/
   ]
+
   for (const pattern of patterns) {
     const match = url.match(pattern)
-    if (match && match[1] && match[1].length === 11) return match[1]
+    if (match && match[1]) return match[1]
   }
   return null
 }
