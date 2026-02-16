@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { FormEvent, useState, useEffect } from 'react'
 import { LogIn, User, Search, GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 type NavbarVariant = 'default' | 'minimal'
 
@@ -55,7 +56,7 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
       if (error) throw error
     } catch (err: any) {
       console.error('Auth Error:', err.message)
-      alert(err.message || 'Check your Supabase GitHub keys setup.')
+      toast.error(err.message || 'Authentication failed. Please check your setup.')
     }
   }
 
@@ -71,10 +72,12 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
         },
       })
       if (error) throw error
-      alert('Check your email for the magic login link!')
+      toast.success('Magic link sent!', {
+        description: 'Check your email to sign in.'
+      })
       setShowEmailInput(false)
     } catch (err: any) {
-      alert(err.message)
+      toast.error(err.message)
     } finally {
       setIsSending(false)
     }
@@ -82,7 +85,8 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.refresh()
+    toast.success('Signed out successfully')
+    router.push('/')
   }
 
   return (

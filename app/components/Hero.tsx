@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Play, Sparkles, ArrowRight, Zap, Shield, Target } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 export default function Hero() {
   const [user, setUser] = useState<any>(null)
@@ -71,8 +72,15 @@ export default function Hero() {
             onClick={(e) => {
               if (!user) {
                 e.preventDefault()
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                (document.querySelector('input[type="email"]') as HTMLInputElement)?.focus()
+                toast.info('Ready to grow?', {
+                  description: 'Please Sign In with GitHub or Email to start your journey.',
+                  action: {
+                    label: 'Sign In',
+                    onClick: () => {
+                      (document.querySelector('input[type="email"]') as HTMLInputElement)?.focus()
+                    }
+                  }
+                })
               }
             }}
             className="group relative px-10 py-5 rounded-[2rem] font-bold text-lg transition-all duration-500 bg-white text-black hover:bg-zinc-200 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.1)] hover:shadow-[0_0_80px_rgba(255,255,255,0.2)] overflow-hidden"

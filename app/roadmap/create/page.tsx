@@ -8,13 +8,27 @@ import AddVideoModal from '../../components/AddVideoModal'
 import type { Roadmap, Video } from '../../../lib/storage'
 import { saveRoadmap } from '../../../lib/storage'
 import { ArrowUp, ArrowDown, Trash2, Plus, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
+import { useEffect } from 'react'
 
 export default function CreateRoadmapPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [videos, setVideos] = useState<Video[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [])
 
   const handleAddVideo = (video: Video) => {
     setVideos((prev) => [...prev, video])
@@ -54,10 +68,11 @@ export default function CreateRoadmapPage() {
       }
 
       await saveRoadmap(roadmap)
+      toast.success('Roadmap created successfully!')
       router.push('/dashboard')
     } catch (err) {
       console.error("Failed to create roadmap:", err)
-      alert("Failed to save roadmap. Please check your connection.")
+      toast.error("Failed to save roadmap. Please check your connection.")
     } finally {
       setIsCreating(false)
     }

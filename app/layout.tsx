@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Outfit } from 'next/font/google'
 import MouseGlow from './components/MouseGlow'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const outfit = Outfit({
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en" className={outfit.variable}>
       <body className={`${outfit.className} bg-background antialiased`}>
         <MouseGlow />
+        <Toaster theme="dark" position="top-center" richColors />
         <div className="relative z-10">{children}</div>
       </body>
     </html>

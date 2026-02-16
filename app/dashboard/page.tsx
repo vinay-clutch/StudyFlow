@@ -10,11 +10,25 @@ import StudyChart from '../components/StudyChart'
 import NeedToWatch from '../components/NeedToWatch'
 import { getRoadmapsAsync, type Roadmap } from '../../lib/storage'
 import { BookOpen, PlayCircle, Clock, CheckCircle, Loader2, Plus } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const supabase = createClient()
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([])
   const [mounted, setMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [])
 
   const refreshData = async () => {
     setIsLoading(true)

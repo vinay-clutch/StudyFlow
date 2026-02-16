@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Download, Clock, Sparkles } from 'lucide-react'
 import { saveNotes } from '../../lib/storage'
+import { toast } from 'sonner'
 
 interface NotesEditorProps {
   roadmapId?: string
@@ -73,9 +74,9 @@ export default function NotesEditor({
           <button
             type="button"
             onClick={() =>
-              alert(
-                'AI Summary feature coming soon! This will use Claude API to summarize the video transcript.',
-              )
+              toast.info('AI Summary feature coming soon!', {
+                description: 'This will use Claude API to summarize the video transcript.'
+              })
             }
             className="hidden items-center gap-2 rounded-lg border border-purple-500/30 bg-purple-600/20 px-3 py-1.5 text-[11px] text-purple-200 transition-colors hover:bg-purple-600/30 sm:flex"
           >

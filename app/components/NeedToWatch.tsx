@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Bookmark, Plus, Play, Trash2, ExternalLink, Link as LinkIcon, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface QueuedVideo {
   id: string
@@ -54,7 +55,7 @@ export default function NeedToWatch() {
   const addToQueue = async (e: React.FormEvent) => {
     e.preventDefault()
     const videoId = extractId(url)
-    if (!videoId) return alert("Invalid YouTube URL")
+    if (!videoId) return toast.error("Invalid YouTube URL")
 
     setIsAdding(true)
     try {
@@ -71,8 +72,9 @@ export default function NeedToWatch() {
       
       setQueue([newVideo, ...queue])
       setUrl('')
+      toast.success('Added to queue!')
     } catch (err) {
-      alert("Failed to fetch video details")
+      toast.error("Failed to fetch video details")
     } finally {
       setIsAdding(false)
     }

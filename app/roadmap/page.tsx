@@ -1,7 +1,8 @@
  'use client';
 
 import { useEffect, useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import RoadmapCard from '../components/RoadmapCard'
@@ -9,9 +10,21 @@ import { deleteRoadmap, getRoadmapsAsync, type Roadmap } from '../../lib/storage
 import { Trash2, Loader2, FolderSearch } from 'lucide-react'
 
 function RoadmapListContent() {
+  const router = useRouter()
+  const supabase = createClient()
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [])
   const searchQuery = searchParams.get('search') || ''
 
   const fetchAll = async () => {

@@ -9,6 +9,8 @@ import { Plus, Trash2, CheckCircle2, Circle, Calendar, List as ListIcon, Cloud, 
 import { fetchTasks, upsertTask, deleteTaskFromDb, type Task } from '@/lib/supabase-service'
 import { format, subDays, isSameDay, parseISO } from 'date-fns'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 // Types
 interface Habit {
@@ -18,6 +20,8 @@ interface Habit {
 }
 
 export default function PlannerPage() {
+  const router = useRouter()
+  const supabase = createClient()
   const [tasks, setTasks] = useState<Task[]>([])
   const [habits, setHabits] = useState<Habit[]>([])
   const [newTaskTitle, setNewTaskTitle] = useState('')
@@ -26,6 +30,16 @@ export default function PlannerPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [])
 
   // Load data
   useEffect(() => {
