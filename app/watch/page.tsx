@@ -89,42 +89,48 @@ function WatchContent() {
     return (
       <div className="min-h-screen bg-black text-foreground flex flex-col h-screen overflow-hidden">
         <Navbar variant="minimal" />
-        <main className="flex-1 flex flex-col items-center justify-center p-6 bg-zinc-950">
-          <div className="w-full max-w-5xl">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-white uppercase tracking-tighter">Demo Mode</h1>
-                <p className="text-xs text-zinc-500 mt-1">Previewing distract-free video player.</p>
-              </div>
-              <Link 
-                href="/"
-                className="flex items-center gap-2 rounded-xl bg-white px-6 py-2 text-xs font-bold text-black hover:bg-zinc-200 transition-all"
-              >
-                Sign In to Save Progress
-              </Link>
-            </div>
-            
-            <div className="aspect-video rounded-3xl overflow-hidden border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.5)]">
-               <VideoPlayer videoId={videoId} />
-            </div>
+        
+        {/* Demo Banner */}
+        <div className="bg-blue-600/10 border-b border-blue-500/20 px-6 py-2 flex items-center justify-center gap-4">
+          <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+            Demo Mode: Your notes will not be saved. Sign in to sync progress.
+          </p>
+          <Link 
+            href="/"
+            className="rounded-full bg-blue-500 px-3 py-1 text-[10px] font-bold text-white hover:bg-blue-400 transition-all uppercase"
+          >
+            Sign In Now
+          </Link>
+        </div>
 
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { title: "Smart Notes", icon: Edit3, desc: "Take timestamped notes linked to the video." },
-                { title: "Personal Roadmaps", icon: List, desc: "Organize videos into structured courses." },
-                { title: "Deep Work Tools", icon: Timer, desc: "Integrated focus timers and task tracking." }
-              ].map((feat, i) => (
-                <div key={i} className="glass-card !p-6 border border-white/5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-not-allowed relative group">
-                  <div className="absolute top-4 right-4 text-zinc-600">
-                    <Lock size={14} />
-                  </div>
-                  <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center mb-4">
-                    <feat.icon size={18} />
-                  </div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-2">{feat.title}</h3>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed">{feat.desc}</p>
-                </div>
-              ))}
+        <main className="flex-1 flex overflow-hidden">
+          {/* Left: Video */}
+          <div className="w-[60%] border-r border-white/5 bg-black overflow-y-auto">
+            <div className="bg-zinc-950 flex justify-center pt-8 pb-8 px-6">
+              <div className="w-full max-w-5xl"> 
+                <VideoPlayer videoId={videoId} />
+              </div>
+            </div>
+            <div className="p-6 border-t border-white/5 text-center py-20 grayscale opacity-30">
+               <Lock size={24} className="mx-auto mb-4 text-zinc-500" />
+               <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Roadmap Timeline Locked</p>
+            </div>
+          </div>
+
+          {/* Right: Notes */}
+          <div className="w-[40%] bg-[#09090b] flex flex-col">
+            <div className="flex border-b border-white/5 bg-black/20">
+              <button className="flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 border-zinc-100 text-white bg-white/5">
+                <Edit3 size={14} />
+                Demo Notes
+              </button>
+              <button className="flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest text-zinc-600 grayscale cursor-not-allowed">
+                <List size={14} />
+                Playlist Locked
+              </button>
+            </div>
+            <div className="flex-1 p-6 overflow-auto">
+              <NotesEditor initialNotes="# Demo Notes\nTry typing here! These notes link to the video timestamp [[00:05]]." />
             </div>
           </div>
         </main>
