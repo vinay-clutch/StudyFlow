@@ -13,20 +13,26 @@ interface AddVideoModalProps {
 function extractVideoId(url: string): string | null {
   url = url.trim()
   
-  // Try to find 'v=' parameter first as it's the most reliable for specific videos in playlists
-  const vMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
-  if (vMatch) return vMatch[1]
+  // 1. Prioritize 'v=' parameter (standard)
+  const vParameterMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  if (vParameterMatch) return vParameterMatch[1]
 
-  // Handle other variants: shorts, embed, youtu.be
-  const patterns = [
-    /(?:v\/|vi\/|shorts\/|embed\/|youtu\.be\/|be\/|v=)([a-zA-Z0-9_-]{11})/,
-    /([a-zA-Z0-9_-]{11})/
-  ]
+  // 2. Handle short URLs (youtu.be)
+  const shortUrlMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+  if (shortUrlMatch) return shortUrlMatch[1]
 
-  for (const pattern of patterns) {
-    const match = url.match(pattern)
-    if (match && match[1]) return match[1]
-  }
+  // 3. Handle embed URLs
+  const embedUrlMatch = url.match(/embed\/([a-zA-Z0-9_-]{11})/)
+  if (embedUrlMatch) return embedUrlMatch[1]
+
+  // 4. Handle standard path /v/
+  const vPathMatch = url.match(/\/v\/([a-zA-Z0-9_-]{11})/)
+  if (vPathMatch) return vPathMatch[1]
+  
+  // 5. Last resort: simple 11-char ID check if the input is JUST the ID
+  // Be careful not to match 'playlist?list=PL...' which has PL...
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url
+  
   return null
 }
 
@@ -150,14 +156,19 @@ export default function AddVideoModal({ isOpen, onClose, onAddVideo }: AddVideoM
                 required
               />
             ) : (
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                rows={5}
-                placeholder="Paste multiple links here..."
-                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none"
-                required
-              />
+              <div className="space-y-2">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  rows={5}
+                  placeholder="Paste multiple video links here..."
+                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none"
+                  required
+                />
+                <p className="text-[10px] text-gray-500">
+                  <span className="font-bold text-blue-400">Note:</span> To import a playlist, please copy-paste the URLs of all videos here. Direct playlist (list=...) import is not supported yet.
+                </p>
+              </div>
             )}
           </div>
 

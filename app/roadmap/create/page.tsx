@@ -68,7 +68,7 @@ export default function CreateRoadmapPage() {
       <Navbar />
       <Sidebar />
 
-      <main className="ml-64 px-8 pb-16 pt-8">
+      <main className="ml-64 px-8 pb-16 pt-24">
         <header className="mb-8">
           <h1 className="text-2xl font-semibold text-white">Create Roadmap</h1>
           <p className="text-sm text-gray-400">

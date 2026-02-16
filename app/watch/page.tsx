@@ -1,24 +1,58 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import VideoPlayer from '../components/VideoPlayer'
 import NotesEditor from '../components/NotesEditor'
 import VideoTimeline from '../components/VideoTimeline'
 import PDFViewer from '../components/PDFViewer'
 import StudyTimer from '../components/StudyTimer'
-import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List } from 'lucide-react'
+import { getRoadmaps, saveRoadmap, type Roadmap } from '../../lib/storage'
+import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List, ArrowLeft, ArrowRight, Trash2, Play, CheckCircle2 } from 'lucide-react'
 
 type ViewMode = 'split' | 'video-focus' | 'notes-focus' | 'pdf-focus'
 
 export default function WatchPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const videoId = searchParams.get('videoId') || ''
   const roadmapId = searchParams.get('roadmapId') || undefined
-  const [activeTab, setActiveTab] = useState<'notes' | 'pdf' | 'timeline' | 'timer'>('notes')
+  // Default to playlist if in a roadmap, else notes
+  const [activeTab, setActiveTab] = useState<'playlist' | 'notes' | 'pdf' | 'timeline'>('notes')
   const [viewMode, setViewMode] = useState<ViewMode>('split')
+  const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
+
+  useEffect(() => {
+    if (roadmapId) {
+      const roadmaps = getRoadmaps()
+      const found = roadmaps.find(r => r.id === roadmapId)
+      if (found) {
+        setRoadmap(found)
+        setActiveTab('playlist')
+      }
+    }
+  }, [roadmapId])
+
+  const handleDeleteVideo = async (vidId: string) => {
+    if (!roadmap) return
+    if (confirm('Remove this video from the roadmap?')) {
+      const updatedVideos = roadmap.videos.filter(v => v.youtubeId !== vidId)
+      const updatedRoadmap = { ...roadmap, videos: updatedVideos }
+      setRoadmap(updatedRoadmap)
+      await saveRoadmap(updatedRoadmap)
+      
+      // If deleted current video, redirect to first video or roadmap list
+      if (vidId === videoId) {
+        if (updatedVideos.length > 0) {
+          router.push(`/watch?videoId=${updatedVideos[0].youtubeId}&roadmapId=${roadmapId}`)
+        } else {
+          router.push('/roadmap')
+        }
+      }
+    }
+  }
 
   if (!videoId) {
     return (
@@ -41,43 +75,36 @@ export default function WatchPage() {
 
   return (
     <div className="min-h-screen bg-black text-foreground flex flex-col h-screen overflow-hidden">
-      <Navbar variant="minimal" />
-
+      
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-[#050505] px-6 py-2">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-xs text-gray-400 hover:text-white transition-colors">
-            ← Back to Dashboard
+      <div className="flex items-center justify-between border-b border-white/5 bg-[#09090b] px-6 py-3 z-50">
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard" className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider group">
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            Back
           </Link>
           <div className="h-4 w-px bg-white/10" />
-          <div className="flex gap-1">
+          <div className="flex gap-1 bg-zinc-900/50 p-1 rounded-lg border border-white/5">
             <button 
               onClick={() => setViewMode('split')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'split' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              className={`p-2 rounded-md transition-all ${viewMode === 'split' ? 'bg-zinc-100 text-black shadow-lg' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               title="Split View"
             >
-              <Layout size={18} />
+              <Layout size={16} />
             </button>
             <button 
               onClick={() => setViewMode('video-focus')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'video-focus' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              className={`p-2 rounded-md transition-all ${viewMode === 'video-focus' ? 'bg-zinc-100 text-black shadow-lg' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               title="Video Focus"
             >
-              <VideoIcon size={18} />
+              <VideoIcon size={16} />
             </button>
             <button 
               onClick={() => setViewMode('notes-focus')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'notes-focus' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              className={`p-2 rounded-md transition-all ${viewMode === 'notes-focus' ? 'bg-zinc-100 text-black shadow-lg' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
               title="Notes Focus"
             >
-              <Edit3 size={18} />
-            </button>
-            <button 
-              onClick={() => setViewMode('pdf-focus')}
-              className={`p-1.5 rounded-lg transition-all ${viewMode === 'pdf-focus' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
-              title="PDF Focus"
-            >
-              <FileText size={18} />
+              <Edit3 size={16} />
             </button>
           </div>
         </div>
@@ -90,48 +117,111 @@ export default function WatchPage() {
 
       <main className="flex-1 flex overflow-hidden">
         {/* Left Section: Video */}
-        <div className={`transition-all duration-300 border-r border-white/10 bg-black ${
+        <div className={`transition-all duration-300 border-r border-white/5 bg-black overflow-y-auto custom-scrollbar ${
           viewMode === 'video-focus' ? 'w-full' : 
           viewMode === 'notes-focus' || viewMode === 'pdf-focus' ? 'w-0 overflow-hidden' : 
-          'w-[60%]'
+          'w-[65%]'
         }`}>
-          <div className="h-full p-4">
-            <VideoPlayer videoId={videoId} roadmapId={roadmapId} />
-            <div className="mt-4">
+          <div className="min-h-full flex flex-col">
+            <div className="bg-zinc-950 flex justify-center pt-8 pb-8 px-6 relative shrink-0">
+              <div className="w-full max-w-5xl"> 
+                {/* VideoPlayer renders both the video and the status card */}
+                <VideoPlayer videoId={videoId} roadmapId={roadmapId} />
+              </div>
+            </div>
+            <div className="p-6 border-t border-white/5 bg-[#09090b] flex-1">
               <VideoTimeline roadmapId={roadmapId} videoId={videoId} />
             </div>
           </div>
         </div>
 
-        {/* Right Section: Tools (Notes / PDF) */}
-        <div className={`transition-all duration-300 flex flex-col bg-[#090909] ${
+        {/* Right Section: Tools (Notes / PDF / Playlist) */}
+        <div className={`transition-all duration-300 flex flex-col bg-[#09090b] ${
           viewMode === 'video-focus' ? 'w-0 overflow-hidden' : 
           viewMode === 'notes-focus' || viewMode === 'pdf-focus' ? 'w-full' : 
-          'w-[40%]'
+          'w-[35%]'
         }`}>
           {/* Tabs for Tools */}
-          <div className="flex border-b border-white/10 bg-black/40">
+          <div className="flex border-b border-white/5 bg-black/20 overflow-x-auto">
+            {roadmapId && (
+              <button
+                onClick={() => setActiveTab('playlist')}
+                className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 flex-shrink-0 ${
+                  activeTab === 'playlist' ? 'border-zinc-100 text-white bg-white/5' : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                <List size={14} />
+                Playlist
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('notes')}
-              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all border-b-2 ${
-                activeTab === 'notes' ? 'border-blue-500 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'
+              className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 flex-shrink-0 ${
+                activeTab === 'notes' ? 'border-zinc-100 text-white bg-white/5' : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              <Edit3 size={16} />
+              <Edit3 size={14} />
               Notes
             </button>
             <button
               onClick={() => setActiveTab('pdf')}
-              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all border-b-2 ${
-                activeTab === 'pdf' ? 'border-blue-500 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'
+              className={`flex items-center gap-2 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all border-b-2 flex-shrink-0 ${
+                activeTab === 'pdf' ? 'border-zinc-100 text-white bg-white/5' : 'border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              <FileText size={16} />
+              <FileText size={14} />
               PDF Reader
             </button>
           </div>
 
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 overflow-auto p-6">
+            {activeTab === 'playlist' && roadmap && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                   <h3 className="text-sm font-bold text-white uppercase tracking-wider">Course Content</h3>
+                   <span className="text-xs text-zinc-500">{roadmap.videos.length} videos</span>
+                </div>
+                {roadmap.videos.map((video, index) => (
+                  <div 
+                    key={video.id}
+                    className={`group flex items-center gap-4 p-3 rounded-xl border transition-all cursor-pointer ${
+                      video.youtubeId === videoId 
+                        ? 'bg-zinc-800 border-zinc-700' 
+                        : 'bg-black/20 border-white/5 hover:border-white/10 hover:bg-white/5'
+                    }`}
+                    onClick={() => router.push(`/watch?videoId=${video.youtubeId}&roadmapId=${roadmap.id}`)}
+                  >
+                     <div className="relative w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 bg-zinc-900">
+                        <img src={video.thumbnail} alt={video.title} className="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition-opacity" />
+                        {video.completed && (
+                          <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
+                            <CheckCircle2 size={16} className="text-emerald-500" />
+                          </div>
+                        )}
+                        {video.youtubeId === videoId && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <Play size={16} className="text-white fill-current" />
+                          </div>
+                        )}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold line-clamp-2 ${video.youtubeId === videoId ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
+                          {index + 1}. {video.title}
+                        </p>
+                        <p className="text-[10px] text-zinc-600 mt-1">{video.duration || 'Video'}</p>
+                     </div>
+                     <button 
+                       onClick={(e) => { e.stopPropagation(); handleDeleteVideo(video.youtubeId); }}
+                       className="p-2 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                       title="Remove video"
+                     >
+                       <Trash2 size={14} />
+                     </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {activeTab === 'notes' && (
               <div className="h-full">
                 <NotesEditor roadmapId={roadmapId} videoId={videoId} />
@@ -148,4 +238,3 @@ export default function WatchPage() {
     </div>
   )
 }
-

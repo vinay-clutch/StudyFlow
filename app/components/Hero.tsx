@@ -17,11 +17,11 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black selection:bg-indigo-500/30">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black selection:bg-white/30">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-indigo-600 animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-purple-600" />
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.08] bg-white animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.1] bg-blue-900" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20 text-center">
@@ -29,9 +29,9 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-indigo-300 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-zinc-300 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md"
         >
-          <Sparkles size={12} className="animate-pulse" />
+          <Sparkles size={12} className="text-white" />
           The Future of Focused Learning
         </motion.div>
 
@@ -43,7 +43,7 @@ export default function Hero() {
           className="text-7xl md:text-9xl font-black text-white mb-8 tracking-tightest leading-[0.9]"
         >
           Focus. Study.<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-600">
             Evolve.
           </span>
         </motion.h1>
@@ -53,7 +53,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-lg md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light"
+          className="text-lg md:text-2xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light"
         >
           Master any subject from YouTube with zero distractions. Built for high-performance students who value their time.
         </motion.p>
@@ -65,6 +65,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-24"
         >
+          {/* Sign In Trigger (Hidden Input Hack Wrapper) */}
           <Link
             href={user ? "/dashboard" : "#"}
             onClick={(e) => {
@@ -74,7 +75,7 @@ export default function Hero() {
                 (document.querySelector('input[type="email"]') as HTMLInputElement)?.focus()
               }
             }}
-            className="group relative px-10 py-5 rounded-[2rem] font-bold text-lg transition-all duration-500 bg-white text-black hover:bg-white/90 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.1)] hover:shadow-[0_0_80px_rgba(99,102,241,0.4)] overflow-hidden"
+            className="group relative px-10 py-5 rounded-[2rem] font-bold text-lg transition-all duration-500 bg-white text-black hover:bg-zinc-200 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.1)] hover:shadow-[0_0_80px_rgba(255,255,255,0.2)] overflow-hidden"
           >
             <span className="relative z-10 flex items-center gap-2">
               {user ? 'Go to Dashboard' : 'Get Started for Free'}
@@ -105,11 +106,11 @@ export default function Hero() {
               transition={{ delay: 0.5 + i * 0.1 }}
               className="glass-card p-8 flex flex-col items-center group cursor-default"
             >
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-500">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-500">
                  <feat.icon size={24} />
               </div>
               <h3 className="text-white font-bold mb-2 uppercase tracking-widest text-[10px]">{feat.title}</h3>
-              <p className="text-gray-500 text-xs leading-relaxed">{feat.desc}</p>
+              <p className="text-zinc-500 text-xs leading-relaxed">{feat.desc}</p>
             </motion.div>
           ))}
         </div>

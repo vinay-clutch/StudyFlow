@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
       <Navbar />
       <Sidebar />
 
-      <main className="ml-64 px-8 pb-16 pt-32">
+      <main className="ml-64 px-8 pb-16 pt-24">
         <header className="mb-12 lg:flex lg:items-center lg:justify-between">
           <div>
             <h1 className="text-4xl font-black text-white tracking-tightest font-outfit">Study Library</h1>
@@ -137,8 +137,8 @@ export default function AnalyticsPage() {
                     onClick={() => setSelectedCollection(col)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
                       selectedCollection === col 
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
-                      : 'text-gray-500 hover:bg-white/5 hover:text-white'
+                      ? 'bg-zinc-100 text-black shadow-lg shadow-zinc-500/20' 
+                      : 'text-zinc-500 hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     <span className="text-xs font-bold font-outfit">{col}</span>

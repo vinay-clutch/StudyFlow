@@ -59,7 +59,7 @@ export default function DashboardPage() {
       <Navbar />
       <Sidebar />
 
-      <main className="ml-64 px-8 pb-16 pt-8">
+      <main className="ml-64 px-8 pb-16 pt-24">
         {isLoading && roadmaps.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-40">
             <Loader2 className="animate-spin text-indigo-500 mb-4" size={40} />
@@ -69,42 +69,33 @@ export default function DashboardPage() {
           <>
             {/* Stats */}
             <section className="mb-10">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold text-white tracking-tight">Overview</h1>
-            <p className="text-sm text-gray-500 mt-1">Track your growth and learning milestones.</p>
-          </header>
+              <header className="mb-8">
+                <h1 className="text-3xl font-bold text-white tracking-tight">Overview</h1>
+                <p className="text-sm text-zinc-500 mt-1">Track your growth and learning milestones.</p>
+              </header>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat, i) => (
-              <div key={i} className="group relative glass-card !p-6 hover:border-indigo-500/30">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{stat.label}</p>
-                    <p className="mt-2 text-3xl font-black text-white font-outfit">{stat.value}</p>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {stats.map((stat, i) => (
+                  <div key={i} className="group relative glass-card !p-6 hover:border-blue-500/30 bg-[#09090b]">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{stat.label}</p>
+                        <p className="mt-2 text-3xl font-black text-white font-outfit">{stat.value}</p>
+                      </div>
+                      <div className={`rounded-xl bg-zinc-800 p-2.5 ${stat.color} transition-colors group-hover:bg-zinc-700`}>
+                        <stat.icon size={20} />
+                      </div>
+                    </div>
+                    {/* Subtle bottom accent */}
+                    <div className="absolute bottom-0 left-0 h-1 w-0 bg-blue-600 transition-all group-hover:w-full" />
                   </div>
-                  <div className={`rounded-xl bg-white/5 p-2.5 ${stat.color} transition-colors group-hover:bg-white/10`}>
-                    <stat.icon size={20} />
-                  </div>
-                </div>
-                {/* Subtle bottom accent */}
-                <div className="absolute bottom-0 left-0 h-1 w-0 bg-indigo-600 transition-all group-hover:w-full" />
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
         {/* Study chart */}
         <section className="mb-12">
-          <div className="rounded-2xl border border-white/10 bg-[#090909] p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Study Activity</h2>
-              <div className="flex gap-2 text-xs text-gray-400">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-500" /> Goal</span>
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gray-600" /> Actual</span>
-              </div>
-            </div>
-            <StudyChart />
-          </div>
+          <StudyChart />
         </section>
 
         {/* Roadmaps */}

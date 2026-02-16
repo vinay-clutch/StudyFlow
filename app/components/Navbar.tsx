@@ -86,27 +86,27 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
   }
 
   return (
-    <nav className="fixed left-0 right-0 top-0 z-[100] border-b border-white/5 bg-black/60 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center px-6">
+    <nav className="fixed left-0 right-0 top-0 z-[100] border-b border-white/5 bg-[#09090b]/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-7xl items-center px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 transition-transform hover:scale-105 active:scale-95">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 shadow-[0_0_20px_rgba(79,70,229,0.4)]">
-            <span className="text-xl font-black text-white">S</span>
+        <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-black shadow-lg">
+            <span className="text-lg font-black">S</span>
           </div>
-          <span className="text-xl font-black text-white tracking-tighter font-outfit">StudyFlow.</span>
+          <span className="text-lg font-black text-white tracking-tighter font-outfit">StudyFlow.</span>
         </Link>
 
         {/* Dynamic Search - Only visible after sign-in */}
         {user && (
           <div className="ml-12 hidden md:block">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" size={14} />
               <input 
                 type="text"
                 placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-80 rounded-2xl border border-white/5 bg-white/[0.03] py-2.5 pl-12 pr-4 text-sm text-white placeholder:text-gray-700 outline-none focus:border-indigo-500/50 transition-all focus:bg-white/[0.06]"
+                className="w-80 rounded-xl border border-white/5 bg-zinc-900 py-1.5 pl-10 pr-4 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-white/20 transition-all focus:bg-zinc-800"
               />
             </div>
           </div>
@@ -123,14 +123,14 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
                     placeholder="Enter email..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-48 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 transition-all focus:bg-white/10"
+                    className="w-48 rounded-xl border border-white/10 bg-zinc-900 px-4 py-2.5 text-sm text-white outline-none focus:border-white/20 transition-all"
                     required
                   />
                 </div>
                 <button 
                   type="submit"
                   disabled={isSending}
-                  className="group flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-indigo-500 hover:scale-105 active:scale-95 disabled:opacity-50"
+                  className="group flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-black transition-all hover:bg-zinc-200 active:scale-95 disabled:opacity-50"
                 >
                   <LogIn size={16} className="transition-transform group-hover:translate-x-1" />
                   {isSending ? 'Sending...' : 'Sign In'}
@@ -140,17 +140,17 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
           ) : (
             <div className="flex items-center gap-4">
               <div className="hidden flex-col items-end md:flex">
-                <p className="text-xs font-bold text-gray-300 leading-none">{user.email?.split('@')[0]}</p>
+                <p className="text-xs font-bold text-zinc-400 leading-none">{user.email?.split('@')[0]}</p>
                 <button 
                   onClick={handleSignOut}
-                  className="mt-1 text-[10px] font-bold text-indigo-400 hover:text-red-400 uppercase tracking-widest transition-colors"
+                  className="mt-1 text-[10px] font-bold text-zinc-500 hover:text-red-400 uppercase tracking-widest transition-colors"
                 >
                   Sign Out
                 </button>
               </div>
               <div className="group relative">
-                <div className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold text-indigo-400 shadow-xl shadow-indigo-500/10 transition-transform hover:scale-105">
-                  {user.email?.[0].toUpperCase() ?? <User size={18} />}
+                <div className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-zinc-900 text-xs font-bold text-white transition-transform hover:scale-105 hover:bg-zinc-800">
+                  {user.email?.[0].toUpperCase() ?? <User size={16} />}
                 </div>
               </div>
             </div>

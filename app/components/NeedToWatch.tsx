@@ -28,16 +28,26 @@ export default function NeedToWatch() {
 
   const extractId = (url: string) => {
     url = url.trim()
-    const vMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
-    if (vMatch) return vMatch[1]
-    const patterns = [
-      /(?:v\/|vi\/|shorts\/|embed\/|youtu\.be\/|be\/|v=)([a-zA-Z0-9_-]{11})/,
-      /([a-zA-Z0-9_-]{11})/
-    ]
-    for (const pattern of patterns) {
-      const match = url.match(pattern)
-      if (match && match[1]) return match[1]
-    }
+    
+    // 1. Prioritize 'v=' parameter (standard)
+    const vParameterMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+    if (vParameterMatch) return vParameterMatch[1]
+
+    // 2. Handle short URLs (youtu.be)
+    const shortUrlMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+    if (shortUrlMatch) return shortUrlMatch[1]
+
+    // 3. Handle embed URLs
+    const embedUrlMatch = url.match(/embed\/([a-zA-Z0-9_-]{11})/)
+    if (embedUrlMatch) return embedUrlMatch[1]
+
+    // 4. Handle standard path /v/
+    const vPathMatch = url.match(/\/v\/([a-zA-Z0-9_-]{11})/)
+    if (vPathMatch) return vPathMatch[1]
+    
+    // 5. Last resort: simple 11-char ID check if the input is JUST the ID
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url
+    
     return null
   }
 

@@ -155,11 +155,6 @@ export default function StudyCalendar() {
 
   return (
     <div className="glass-card !bg-black/40 !p-8 border border-white/5 shadow-2xl overflow-hidden relative">
-      <div className="absolute top-0 right-0 p-8">
-         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest animate-pulse">
-           <div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Live Updates
-         </div>
-      </div>
       
       {renderHeader()}
       {renderDays()}
