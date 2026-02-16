@@ -1,6 +1,6 @@
- 'use client'
+ 'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
@@ -8,7 +8,7 @@ import RoadmapCard from '../components/RoadmapCard'
 import { deleteRoadmap, getRoadmapsAsync, type Roadmap } from '../../lib/storage'
 import { Trash2, Loader2, FolderSearch } from 'lucide-react'
 
-export default function RoadmapListPage() {
+function RoadmapListContent() {
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
@@ -100,6 +100,18 @@ export default function RoadmapListPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function RoadmapListPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center px-6">
+        <Loader2 className="animate-spin text-blue-500" size={40} />
+      </div>
+    }>
+      <RoadmapListContent />
+    </Suspense>
   )
 }
 

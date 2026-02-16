@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Navbar from '../components/Navbar'
 import VideoPlayer from '../components/VideoPlayer'
 import NotesEditor from '../components/NotesEditor'
@@ -10,11 +10,11 @@ import VideoTimeline from '../components/VideoTimeline'
 import PDFViewer from '../components/PDFViewer'
 import StudyTimer from '../components/StudyTimer'
 import { getRoadmaps, saveRoadmap, type Roadmap } from '../../lib/storage'
-import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List, ArrowLeft, ArrowRight, Trash2, Play, CheckCircle2 } from 'lucide-react'
+import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List, ArrowLeft, ArrowRight, Trash2, Play, CheckCircle2, Loader2 } from 'lucide-react'
 
 type ViewMode = 'split' | 'video-focus' | 'notes-focus' | 'pdf-focus'
 
-export default function WatchPage() {
+function WatchContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const videoId = searchParams.get('videoId') || ''
@@ -236,5 +236,17 @@ export default function WatchPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function WatchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center px-6">
+        <Loader2 className="animate-spin text-blue-500" size={40} />
+      </div>
+    }>
+      <WatchContent />
+    </Suspense>
   )
 }
