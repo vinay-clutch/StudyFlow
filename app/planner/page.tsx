@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
-import { Plus, Trash2, CheckCircle2, Circle, Calendar, Tag, ChevronDown, MoreVertical, Loader2, Cloud } from 'lucide-react'
+import StudyCalendar from '../components/StudyCalendar'
+import { Plus, Trash2, CheckCircle2, Circle, Calendar, Tag, ChevronDown, MoreVertical, Loader2, Cloud, List as ListIcon } from 'lucide-react'
 import { fetchTasks, upsertTask, deleteTaskFromDb, type Task } from '@/lib/supabase-service'
 
 export default function PlannerPage() {
@@ -11,6 +12,7 @@ export default function PlannerPage() {
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
 
   // Load tasks from Supabase
   useEffect(() => {

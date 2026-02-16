@@ -121,7 +121,9 @@ export default function NotesEditor({
               <div
                 className="prose prose-invert max-w-none text-sm"
                 dangerouslySetInnerHTML={{
-                  __html: notes.replace(/\n/g, '<br />'),
+                  __html: notes
+                    .replace(/```([\s\S]*?)```/g, '<pre class="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 font-mono text-indigo-300 my-4 overflow-x-auto"><code>$1</code></pre>')
+                    .replace(/\n/g, '<br />')
                 }}
               />
             ) : (

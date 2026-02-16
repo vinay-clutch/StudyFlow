@@ -7,6 +7,7 @@ import Sidebar from '../components/Sidebar'
 import RoadmapCard from '../components/RoadmapCard'
 import ProgressBar from '../components/ProgressBar'
 import StudyChart from '../components/StudyChart'
+import NeedToWatch from '../components/NeedToWatch'
 import { getRoadmapsAsync, type Roadmap } from '../../lib/storage'
 import { BookOpen, PlayCircle, Clock, CheckCircle, Loader2, Plus } from 'lucide-react'
 
@@ -47,22 +48,22 @@ export default function DashboardPage() {
   const estimatedHours = (estimatedSeconds / 3600).toFixed(1)
 
   const stats = [
-    { label: 'Total Roadmaps', value: totalRoadmaps, icon: BookOpen, color: 'text-blue-500' },
+    { label: 'Total Roadmaps', value: totalRoadmaps, icon: BookOpen, color: 'text-indigo-500' },
     { label: 'Videos Added', value: totalVideos, icon: PlayCircle, color: 'text-purple-500' },
     { label: 'Hours Learned', value: estimatedHours, icon: Clock, color: 'text-orange-500' },
-    { label: 'Completion Rate', value: `${completionRate}%`, icon: CheckCircle, color: 'text-green-500' },
+    { label: 'Completion Rate', value: `${completionRate}%`, icon: CheckCircle, color: 'text-emerald-500' },
   ]
 
   return (
-    <div className="min-h-screen bg-black text-foreground">
+    <div className="min-h-screen bg-black text-foreground selection:bg-indigo-500/30">
       <Navbar />
       <Sidebar />
 
       <main className="ml-64 px-8 pb-16 pt-8">
         {isLoading && roadmaps.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-40">
-            <Loader2 className="animate-spin text-blue-500 mb-4" size={32} />
-            <p className="text-sm text-gray-500 font-medium">Syncing with Supabase...</p>
+            <Loader2 className="animate-spin text-indigo-500 mb-4" size={40} />
+            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">Digitalizing Roadmaps...</p>
           </div>
         ) : (
           <>
@@ -112,7 +113,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-bold text-white">Continue Your Journey</h2>
             <Link
               href="/roadmap/create"
-              className="group flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xl shadow-blue-500/20 transition-all hover:bg-blue-500 hover:scale-105 active:scale-95"
+              className="group flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xl shadow-indigo-500/20 transition-all hover:bg-indigo-500 hover:scale-105 active:scale-95"
             >
               <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
               New Roadmap
@@ -130,7 +131,7 @@ export default function DashboardPage() {
               </p>
               <Link
                  href="/roadmap/create"
-                 className="mt-6 text-sm font-bold text-blue-500 hover:text-blue-400 underline underline-offset-4"
+                 className="mt-6 text-sm font-bold text-indigo-500 hover:text-indigo-400 underline underline-offset-4"
               >
                 Get Started →
               </Link>
@@ -143,6 +144,8 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
+
+        <NeedToWatch />
 
         {/* Recent Activity */}
         <section>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Play, Sparkles, ArrowRight } from 'lucide-react'
+import { Play, Sparkles, ArrowRight, Zap, Shield, Target } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function Hero() {
@@ -17,63 +17,102 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black pt-24">
-      {/* Centered static blue blur background */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="w-[800px] h-[600px] rounded-full blur-[200px] opacity-70 bg-[radial-gradient(circle_at_center,#06b6d4,#1e3a8a)]" />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black selection:bg-indigo-500/30">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-indigo-600 animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-purple-600" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-32 text-center">
-        {/* Main heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-6xl md:text-8xl font-bold mb-6 text-balance text-white tracking-tighter"
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20 text-center">
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-indigo-300 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md"
         >
-          StudyFlow.
+          <Sparkles size={12} className="animate-pulse" />
+          The Future of Focused Learning
+        </motion.div>
+
+        {/* Huge Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-7xl md:text-9xl font-black text-white mb-8 tracking-tightest leading-[0.9]"
+        >
+          Focus. Study.<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+            Evolve.
+          </span>
         </motion.h1>
 
-        {/* Subheading */}
+        {/* Bio */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto text-balance font-light leading-relaxed"
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-lg md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light"
         >
-          Master any subject from YouTube without distractions. Build custom roadmaps, take notes, and track your progress—all in one place.
+          Master any subject from YouTube with zero distractions. Built for high-performance students who value their time.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* Main Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-24"
         >
           <Link
             href={user ? "/dashboard" : "#"}
             onClick={(e) => {
               if (!user) {
                 e.preventDefault()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-                alert("Please click 'Sign In' at the top to start your journey!")
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                (document.querySelector('input[type="email"]') as HTMLInputElement)?.focus()
               }
             }}
-            className="group px-8 py-4 rounded-2xl font-bold transition-all duration-300 flex items-center gap-2 bg-blue-600 text-white shadow-2xl shadow-blue-500/20 hover:bg-blue-500 hover:scale-105 active:scale-95"
+            className="group relative px-10 py-5 rounded-[2rem] font-bold text-lg transition-all duration-500 bg-white text-black hover:bg-white/90 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.1)] hover:shadow-[0_0_80px_rgba(99,102,241,0.4)] overflow-hidden"
           >
-            {user ? 'Go to Dashboard' : 'Get Started Free'}
-            {user ? <ArrowRight size={18} /> : <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+            <span className="relative z-10 flex items-center gap-2">
+              {user ? 'Go to Dashboard' : 'Get Started for Free'}
+              <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+            </span>
           </Link>
           
           <Link
-            href="/watch?videoId=dQw4w9WgXcQ"
-            className="px-8 py-4 rounded-2xl font-bold transition-all duration-300 border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
+             href="/watch?videoId=dQw4w9WgXcQ"
+             className="px-10 py-5 rounded-[2rem] font-bold text-lg transition-all duration-500 border border-white/10 glass hover:bg-white/10 active:scale-95 text-white flex items-center gap-2"
           >
+            <Play size={18} fill="currentColor" />
             Watch Demo
           </Link>
         </motion.div>
+
+        {/* Feature Grid - Miniature */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {[
+            { icon: Zap, title: "Zero Noise", desc: "No ads, no suggestions, just knowledge." },
+            { icon: Shield, title: "Deep Work", desc: "Built-in Focus Timer & Privacy." },
+            { icon: Target, title: "Roadmaps", desc: "AI-powered structured learning." }
+          ].map((feat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+              className="glass-card p-8 flex flex-col items-center group cursor-default"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-500">
+                 <feat.icon size={24} />
+              </div>
+              <h3 className="text-white font-bold mb-2 uppercase tracking-widest text-[10px]">{feat.title}</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">{feat.desc}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )

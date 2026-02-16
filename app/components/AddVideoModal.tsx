@@ -14,8 +14,8 @@ function extractVideoId(url: string): string | null {
   url = url.trim()
   // Handle shorts, standard watch, youtu.be, embed, and playlist-style links
   const patterns = [
-    /(?:v=|v\/|vi=|vi\/|shorts\/|embed\/|youtu\.be\/|be\/)([^#&?]*)/,
     /[?&]v=([^#&?]*)/,
+    /(?:v=|v\/|vi=|vi\/|shorts\/|embed\/|youtu\.be\/|be\/)([^#&?]*)/,
     /([a-zA-Z0-9_-]{11})/
   ]
   for (const pattern of patterns) {

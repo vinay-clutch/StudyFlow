@@ -120,54 +120,39 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
         <div className="ml-auto flex items-center gap-4">
           {!user ? (
             <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setShowEmailInput(!showEmailInput)}
-                  className="hidden text-xs text-gray-500 hover:text-white md:block transition-colors"
-                >
-                  {showEmailInput ? 'Use Social Login' : 'Sign in with Email'}
-                </button>
-                <button 
-                  onClick={handleSignIn}
-                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20"
-                >
-                  <LogIn size={16} />
-                  Sign In with GitHub
-                </button>
-              </div>
-              
-              {showEmailInput && (
-                <form onSubmit={handleEmailLogin} className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+              <form onSubmit={handleEmailLogin} className="flex items-center gap-3">
+                <div className="relative">
                   <input 
                     type="email"
-                    placeholder="Enter email for magic link"
+                    placeholder="Enter email..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-lg border border-white/10 bg-black px-3 py-1.5 text-xs text-white outline-none focus:border-blue-500 transition-all"
+                    className="w-48 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 transition-all focus:bg-white/10"
                     required
                   />
-                  <button 
-                    type="submit"
-                    disabled={isSending}
-                    className="text-xs font-bold text-blue-500 hover:text-blue-400 disabled:opacity-50"
-                  >
-                    {isSending ? 'Sending...' : 'Send Link'}
-                  </button>
-                </form>
-              )}
+                </div>
+                <button 
+                  type="submit"
+                  disabled={isSending}
+                  className="group flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-indigo-500 hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  <LogIn size={16} className="transition-transform group-hover:translate-x-1" />
+                  {isSending ? 'Sending...' : 'Sign In'}
+                </button>
+              </form>
             </div>
           ) : (
             <div className="flex items-center gap-4">
               <div className="hidden flex-col items-end md:flex">
-                <p className="text-xs font-bold text-white leading-none">{user.email?.split('@')[0]}</p>
+                <p className="text-xs font-bold text-gray-300 leading-none">{user.email?.split('@')[0]}</p>
                 <button 
                   onClick={handleSignOut}
-                  className="mt-1 text-[10px] font-bold text-gray-500 hover:text-red-400 uppercase tracking-widest transition-colors"
+                  className="mt-1 text-[10px] font-bold text-indigo-400 hover:text-red-400 uppercase tracking-widest transition-colors"
                 >
                   Sign Out
                 </button>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-bold text-white shadow-xl shadow-blue-500/10">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold text-indigo-400 shadow-xl shadow-indigo-500/10 transition-transform hover:scale-105">
                 {user.email?.[0].toUpperCase() ?? <User size={18} />}
               </div>
             </div>

@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Outfit } from 'next/font/google'
+import MouseGlow from './components/MouseGlow'
 import './globals.css'
 
-const inter = Inter({
+const outfit = Outfit({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-outfit',
 })
 
 export const metadata: Metadata = {
@@ -28,8 +29,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={outfit.variable}>
+      <body className={`${outfit.className} bg-background antialiased`}>
+        <MouseGlow />
+        <div className="relative z-10">{children}</div>
+      </body>
     </html>
   )
 }
