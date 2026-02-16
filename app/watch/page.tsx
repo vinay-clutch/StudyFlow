@@ -1,8 +1,9 @@
 'use client'
 
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useState, useEffect, Suspense } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import Navbar from '../components/Navbar'
 import VideoPlayer from '../components/VideoPlayer'
 import NotesEditor from '../components/NotesEditor'
@@ -10,19 +11,29 @@ import VideoTimeline from '../components/VideoTimeline'
 import PDFViewer from '../components/PDFViewer'
 import StudyTimer from '../components/StudyTimer'
 import { getRoadmaps, saveRoadmap, type Roadmap } from '../../lib/storage'
-import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List, ArrowLeft, ArrowRight, Trash2, Play, CheckCircle2, Loader2 } from 'lucide-react'
+import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List, ArrowLeft, ArrowRight, Trash2, Play, CheckCircle2, Loader2, Lock } from 'lucide-react'
 
 type ViewMode = 'split' | 'video-focus' | 'notes-focus' | 'pdf-focus'
 
 function WatchContent() {
   const router = useRouter()
+  const supabase = createClient()
   const searchParams = useSearchParams()
   const videoId = searchParams.get('videoId') || ''
   const roadmapId = searchParams.get('roadmapId') || undefined
-  // Default to playlist if in a roadmap, else notes
+  
+  const [user, setUser] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'playlist' | 'notes' | 'pdf' | 'timeline'>('notes')
   const [viewMode, setViewMode] = useState<ViewMode>('split')
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+  }, [])
 
   useEffect(() => {
     if (roadmapId) {
@@ -73,6 +84,55 @@ function WatchContent() {
     )
   }
 
+  // --- DEMO MODE (UNAUTHENTICATED) ---
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black text-foreground flex flex-col h-screen overflow-hidden">
+        <Navbar variant="minimal" />
+        <main className="flex-1 flex flex-col items-center justify-center p-6 bg-zinc-950">
+          <div className="w-full max-w-5xl">
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-bold text-white uppercase tracking-tighter">Demo Mode</h1>
+                <p className="text-xs text-zinc-500 mt-1">Previewing distract-free video player.</p>
+              </div>
+              <Link 
+                href="/"
+                className="flex items-center gap-2 rounded-xl bg-white px-6 py-2 text-xs font-bold text-black hover:bg-zinc-200 transition-all"
+              >
+                Sign In to Save Progress
+              </Link>
+            </div>
+            
+            <div className="aspect-video rounded-3xl overflow-hidden border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+               <VideoPlayer videoId={videoId} />
+            </div>
+
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: "Smart Notes", icon: Edit3, desc: "Take timestamped notes linked to the video." },
+                { title: "Personal Roadmaps", icon: List, desc: "Organize videos into structured courses." },
+                { title: "Deep Work Tools", icon: Timer, desc: "Integrated focus timers and task tracking." }
+              ].map((feat, i) => (
+                <div key={i} className="glass-card !p-6 border border-white/5 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-not-allowed relative group">
+                  <div className="absolute top-4 right-4 text-zinc-600">
+                    <Lock size={14} />
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center mb-4">
+                    <feat.icon size={18} />
+                  </div>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-2">{feat.title}</h3>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed">{feat.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // --- FULL VIEW (AUTHENTICATED) ---
   return (
     <div className="min-h-screen bg-black text-foreground flex flex-col h-screen overflow-hidden">
       
