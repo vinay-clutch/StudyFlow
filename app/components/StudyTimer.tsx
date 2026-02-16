@@ -1,78 +1,125 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Play, Pause, RotateCcw, Clock } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Clock } from 'lucide-react'
 
-export default function StudyTimer() {
-  const [minutes, setMinutes] = useState(25)
-  const [seconds, setSeconds] = useState(0)
+interface StudyTimerProps {
+  variant?: 'default' | 'compact'
+}
+
+export default function StudyTimer({ variant = 'default' }: StudyTimerProps) {
+  const [seconds, setSeconds] = useState(25 * 60)
   const [isActive, setIsActive] = useState(false)
+  const [totalTime, setTotalTime] = useState(25 * 60)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    let interval: number | undefined
-
-    if (isActive && (minutes > 0 || seconds > 0)) {
-      interval = window.setInterval(() => {
-        setSeconds((prevSeconds) => {
-          if (prevSeconds === 0) {
-            return 59
-          }
-          return prevSeconds - 1
-        })
-        setMinutes((prevMinutes) => {
-          if (seconds === 0) {
-            if (prevMinutes === 0) {
-              setIsActive(false)
-              return 0
-            }
-            return prevMinutes - 1
-          }
-          return prevMinutes
-        })
+    if (isActive && seconds > 0) {
+      timerRef.current = setInterval(() => {
+        setSeconds((prev) => prev - 1)
       }, 1000)
+    } else if (seconds === 0) {
+      setIsActive(false)
+      if (timerRef.current) clearInterval(timerRef.current)
     }
 
     return () => {
-      if (interval) window.clearInterval(interval)
+      if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [isActive, minutes, seconds])
+  }, [isActive, seconds])
 
-  const reset = () => {
-    setMinutes(25)
-    setSeconds(0)
+  const toggleTimer = () => setIsActive(!isActive)
+  const resetTimer = () => {
     setIsActive(false)
+    setSeconds(25 * 60)
+    setTotalTime(25 * 60)
+  }
+
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60)
+    const s = secs % 60
+    return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+
+  const progress = ((totalTime - seconds) / totalTime) * 100
+
+  if (variant === 'compact') {
+    return (
+      <div className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-3 py-1.5 shadow-lg">
+        <div className="relative h-2 w-16 overflow-hidden rounded-full bg-white/5">
+          <div 
+            className="h-full bg-blue-500 transition-all duration-1000" 
+            style={{ width: `${progress}%` }} 
+          />
+        </div>
+        <span className="font-mono text-sm font-bold text-white">{formatTime(seconds)}</span>
+        <button onClick={toggleTimer} className="text-blue-500 hover:text-blue-400">
+          {isActive ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+        </button>
+      </div>
+    )
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <div className="mb-4 flex items-center gap-2">
-        <Clock className="h-5 w-5 text-blue-500" />
-        <h3 className="text-sm font-semibold text-white">Study Timer</h3>
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#0A0A0A] p-8 shadow-2xl overflow-hidden relative group">
+      {/* Background glow */}
+      <div className={`absolute -inset-20 bg-blue-600/10 blur-[100px] transition-opacity duration-1000 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
+      
+      <div className="relative mb-6">
+        {/* Progress Ring */}
+        <svg className="h-48 w-48 -rotate-90">
+          <circle
+            cx="96"
+            cy="96"
+            r="88"
+            stroke="currentColor"
+            strokeWidth="4"
+            fill="transparent"
+            className="text-white/5"
+          />
+          <circle
+            cx="96"
+            cy="96"
+            r="88"
+            stroke="currentColor"
+            strokeWidth="4"
+            fill="transparent"
+            strokeDasharray={2 * Math.PI * 88}
+            strokeDashoffset={2 * Math.PI * 88 * (1 - progress / 100)}
+            strokeLinecap="round"
+            className="text-blue-500 transition-all duration-1000 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+          />
+        </svg>
+        
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={`font-mono text-4xl font-bold tracking-tighter text-white transition-all ${isActive ? 'scale-110' : 'scale-100'}`}>
+            {formatTime(seconds)}
+          </span>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-1">Focus Session</span>
+        </div>
       </div>
 
-      <div className="mb-6 text-center font-mono text-4xl font-bold md:text-5xl">
-        {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-      </div>
-
-      <div className="flex gap-2">
+      <div className="flex items-center gap-6 relative z-10">
         <button
-          type="button"
-          onClick={() => setIsActive((prev) => !prev)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          onClick={resetTimer}
+          className="rounded-full bg-white/5 p-3 text-gray-400 transition-all hover:bg-white/10 hover:text-white"
         >
-          {isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {isActive ? 'Pause' : 'Start'}
+          <RotateCcw size={20} />
         </button>
-
         <button
-          type="button"
-          onClick={reset}
-          className="flex items-center justify-center rounded-lg bg-white/10 px-3 py-2.5 text-sm text-white transition-colors hover:bg-white/20"
+          onClick={toggleTimer}
+          className={`flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300 ${
+            isActive 
+              ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]' 
+              : 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.4)]'
+          }`}
         >
-          <RotateCcw className="h-4 w-4" />
+          {isActive ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
+        </button>
+        <button className="rounded-full bg-white/5 p-3 text-gray-400 transition-all hover:bg-white/10 hover:text-white">
+          <TimerIcon size={20} />
         </button>
       </div>
     </div>
   )
 }
-

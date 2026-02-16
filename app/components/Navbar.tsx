@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FormEvent, useState } from 'react'
-import { GraduationCap } from 'lucide-react'
+import { FormEvent, useState, useEffect } from 'react'
+import { GraduationCap, LogIn, LogOut, User } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 type NavbarVariant = 'default' | 'minimal'
 
@@ -14,7 +15,23 @@ interface NavbarProps {
 export default function Navbar({ variant = 'default' }: NavbarProps) {
   const isMinimal = variant === 'minimal'
   const [searchQuery, setSearchQuery] = useState('')
+  const [user, setUser] = useState<any>(null)
   const router = useRouter()
+  const supabase = createClient()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault()
@@ -23,15 +40,60 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
     }
   }
 
+  const [email, setEmail] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const [showEmailInput, setShowEmailInput] = useState(false)
+
+  const handleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+      if (error) throw error
+    } catch (err: any) {
+      console.error('Auth Error:', err.message)
+      alert(err.message || 'Check your Supabase GitHub keys setup.')
+    }
+  }
+
+  const handleEmailLogin = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setIsSending(true)
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (error) throw error
+      alert('Check your email for the magic login link!')
+      setShowEmailInput(false)
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.refresh()
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-3">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/50">
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold group">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
-          <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
             StudyFlow
           </span>
         </Link>
@@ -45,10 +107,10 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
             <div className="w-full max-w-xl">
               <input
                 type="text"
-                placeholder="Search your roadmaps, videos, or notes..."
+                placeholder="Search your roadmaps..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-gray-500 outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-gray-600 outline-none focus:border-blue-500 transition-all focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </form>
@@ -56,14 +118,60 @@ export default function Navbar({ variant = 'default' }: NavbarProps) {
 
         {/* Right side user/avatar */}
         <div className="ml-auto flex items-center gap-4">
-          {!isMinimal && (
-            <button className="hidden text-sm text-gray-400 hover:text-white md:inline-flex transition-colors">
-              Feedback
-            </button>
+          {!user ? (
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setShowEmailInput(!showEmailInput)}
+                  className="hidden text-xs text-gray-500 hover:text-white md:block transition-colors"
+                >
+                  {showEmailInput ? 'Use Social Login' : 'Sign in with Email'}
+                </button>
+                <button 
+                  onClick={handleSignIn}
+                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20"
+                >
+                  <LogIn size={16} />
+                  Sign In with GitHub
+                </button>
+              </div>
+              
+              {showEmailInput && (
+                <form onSubmit={handleEmailLogin} className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                  <input 
+                    type="email"
+                    placeholder="Enter email for magic link"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-lg border border-white/10 bg-black px-3 py-1.5 text-xs text-white outline-none focus:border-blue-500 transition-all"
+                    required
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isSending}
+                    className="text-xs font-bold text-blue-500 hover:text-blue-400 disabled:opacity-50"
+                  >
+                    {isSending ? 'Sending...' : 'Send Link'}
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <div className="hidden flex-col items-end md:flex">
+                <p className="text-xs font-bold text-white leading-none">{user.email?.split('@')[0]}</p>
+                <button 
+                  onClick={handleSignOut}
+                  className="mt-1 text-[10px] font-bold text-gray-500 hover:text-red-400 uppercase tracking-widest transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-bold text-white shadow-xl shadow-blue-500/10">
+                {user.email?.[0].toUpperCase() ?? <User size={18} />}
+              </div>
+            </div>
           )}
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-medium text-white">
-            SF
-          </button>
         </div>
       </div>
     </header>

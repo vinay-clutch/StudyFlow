@@ -7,7 +7,7 @@ import Sidebar from '../../components/Sidebar'
 import AddVideoModal from '../../components/AddVideoModal'
 import type { Roadmap, Video } from '../../../lib/storage'
 import { saveRoadmap } from '../../../lib/storage'
-import { ArrowUp, ArrowDown, Trash2, Plus } from 'lucide-react'
+import { ArrowUp, ArrowDown, Trash2, Plus, Loader2 } from 'lucide-react'
 
 export default function CreateRoadmapPage() {
   const router = useRouter()
@@ -35,22 +35,32 @@ export default function CreateRoadmapPage() {
     setVideos((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleCreate = () => {
+  const [isCreating, setIsCreating] = useState(false)
+
+  const handleCreate = async () => {
     if (!name.trim()) return
+    setIsCreating(true)
 
-    const now = new Date().toISOString()
-    const roadmap: Roadmap = {
-      id: `roadmap_${Date.now()}`,
-      name: name.trim(),
-      description: description.trim(),
-      videos,
-      createdAt: now,
-      updatedAt: now,
-      totalProgress: 0,
+    try {
+      const now = new Date().toISOString()
+      const roadmap: Roadmap = {
+        id: `roadmap_${Date.now()}`,
+        name: name.trim(),
+        description: description.trim(),
+        videos,
+        createdAt: now,
+        updatedAt: now,
+        totalProgress: 0,
+      }
+
+      await saveRoadmap(roadmap)
+      router.push('/dashboard')
+    } catch (err) {
+      console.error("Failed to create roadmap:", err)
+      alert("Failed to save roadmap. Please check your connection.")
+    } finally {
+      setIsCreating(false)
     }
-
-    saveRoadmap(roadmap)
-    router.push('/roadmap')
   }
 
   return (
@@ -171,10 +181,17 @@ export default function CreateRoadmapPage() {
           <button
             type="button"
             onClick={handleCreate}
-            disabled={!name.trim()}
-            className="inline-flex items-center rounded-full bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition-transform duration-200 hover:scale-105 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!name.trim() || isCreating}
+            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-blue-500/20 transition-all hover:bg-blue-500 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Roadmap
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving Roadmap...
+              </>
+            ) : (
+              'Create Roadmap'
+            )}
           </button>
         </div>
       </main>

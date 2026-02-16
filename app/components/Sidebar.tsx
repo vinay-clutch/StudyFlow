@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FolderOpen, Play, BarChart, Plus } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, Library, MonitorPlay, FolderSearch, Plus } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'My Roadmaps', href: '/roadmap', icon: FolderOpen },
-  { label: 'Watch', href: '/watch', icon: Play },
-  { label: 'Analytics', href: '/analytics', icon: BarChart },
+  { label: 'Planner', href: '/planner', icon: CheckSquare },
+  { label: 'My Roadmaps', href: '/roadmap', icon: FolderSearch },
+  { label: 'Watch', href: '/watch', icon: MonitorPlay },
+  { label: 'Study Library', href: '/analytics', icon: Library },
 ]
 
 export default function Sidebar() {

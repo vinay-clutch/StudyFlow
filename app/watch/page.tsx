@@ -2,17 +2,23 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import Navbar from '../components/Navbar'
 import VideoPlayer from '../components/VideoPlayer'
 import NotesEditor from '../components/NotesEditor'
 import VideoTimeline from '../components/VideoTimeline'
 import PDFViewer from '../components/PDFViewer'
 import StudyTimer from '../components/StudyTimer'
+import { FileText, Edit3, Video as VideoIcon, Layout, Timer, List } from 'lucide-react'
+
+type ViewMode = 'split' | 'video-focus' | 'notes-focus' | 'pdf-focus'
 
 export default function WatchPage() {
   const searchParams = useSearchParams()
   const videoId = searchParams.get('videoId') || ''
   const roadmapId = searchParams.get('roadmapId') || undefined
+  const [activeTab, setActiveTab] = useState<'notes' | 'pdf' | 'timeline' | 'timer'>('notes')
+  const [viewMode, setViewMode] = useState<ViewMode>('split')
 
   if (!videoId) {
     return (
@@ -34,21 +40,108 @@ export default function WatchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-foreground">
+    <div className="min-h-screen bg-black text-foreground flex flex-col h-screen overflow-hidden">
       <Navbar variant="minimal" />
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 pb-10 pt-6 lg:flex-row">
-        <div className="w-full lg:w-[70%] p-0 lg:pr-4">
-          <div className="h-full flex flex-col">
-            <VideoPlayer videoId={videoId} roadmapId={roadmapId} />
+      {/* Toolbar */}
+      <div className="flex items-center justify-between border-b border-white/10 bg-[#050505] px-6 py-2">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="text-xs text-gray-400 hover:text-white transition-colors">
+            ← Back to Dashboard
+          </Link>
+          <div className="h-4 w-px bg-white/10" />
+          <div className="flex gap-1">
+            <button 
+              onClick={() => setViewMode('split')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'split' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              title="Split View"
+            >
+              <Layout size={18} />
+            </button>
+            <button 
+              onClick={() => setViewMode('video-focus')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'video-focus' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              title="Video Focus"
+            >
+              <VideoIcon size={18} />
+            </button>
+            <button 
+              onClick={() => setViewMode('notes-focus')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'notes-focus' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              title="Notes Focus"
+            >
+              <Edit3 size={18} />
+            </button>
+            <button 
+              onClick={() => setViewMode('pdf-focus')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'pdf-focus' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5'}`}
+              title="PDF Focus"
+            >
+              <FileText size={18} />
+            </button>
           </div>
         </div>
-        <div className="w-full lg:w-[30%] border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-4">
-          <div className="flex h-full flex-col gap-4">
-            <StudyTimer />
-            <NotesEditor roadmapId={roadmapId} videoId={videoId} />
-            <PDFViewer />
-            <VideoTimeline roadmapId={roadmapId} videoId={videoId} />
+
+        <div className="flex items-center gap-4">
+           {/* Quick status/timer can go here */}
+           <StudyTimer variant="compact" />
+        </div>
+      </div>
+
+      <main className="flex-1 flex overflow-hidden">
+        {/* Left Section: Video */}
+        <div className={`transition-all duration-300 border-r border-white/10 bg-black ${
+          viewMode === 'video-focus' ? 'w-full' : 
+          viewMode === 'notes-focus' || viewMode === 'pdf-focus' ? 'w-0 overflow-hidden' : 
+          'w-[60%]'
+        }`}>
+          <div className="h-full p-4">
+            <VideoPlayer videoId={videoId} roadmapId={roadmapId} />
+            <div className="mt-4">
+              <VideoTimeline roadmapId={roadmapId} videoId={videoId} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Section: Tools (Notes / PDF) */}
+        <div className={`transition-all duration-300 flex flex-col bg-[#090909] ${
+          viewMode === 'video-focus' ? 'w-0 overflow-hidden' : 
+          viewMode === 'notes-focus' || viewMode === 'pdf-focus' ? 'w-full' : 
+          'w-[40%]'
+        }`}>
+          {/* Tabs for Tools */}
+          <div className="flex border-b border-white/10 bg-black/40">
+            <button
+              onClick={() => setActiveTab('notes')}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all border-b-2 ${
+                activeTab === 'notes' ? 'border-blue-500 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <Edit3 size={16} />
+              Notes
+            </button>
+            <button
+              onClick={() => setActiveTab('pdf')}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all border-b-2 ${
+                activeTab === 'pdf' ? 'border-blue-500 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <FileText size={16} />
+              PDF Reader
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-auto p-4">
+            {activeTab === 'notes' && (
+              <div className="h-full">
+                <NotesEditor roadmapId={roadmapId} videoId={videoId} />
+              </div>
+            )}
+            {activeTab === 'pdf' && (
+              <div className="h-full">
+                <PDFViewer />
+              </div>
+            )}
           </div>
         </div>
       </main>

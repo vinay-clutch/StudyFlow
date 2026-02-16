@@ -1,6 +1,8 @@
 // Local storage helpers and core StudyFlow data structures.
 // All functions are safe to call in a Next.js environment (no-ops on server).
 
+import { fetchRoadmaps, upsertRoadmap, deleteRoadmapFromDb } from './supabase-service'
+
 export interface Timestamp {
   time: number // seconds
   note: string
@@ -29,6 +31,7 @@ export interface Roadmap {
 }
 
 const STORAGE_KEY = 'studyflow_roadmaps'
+const VIDEO_POSITION_KEY = 'studyflow_video_positions'
 
 function isBrowser() {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
@@ -54,8 +57,6 @@ function writeRoadmaps(roadmaps: Roadmap[]) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(roadmaps))
   } catch (error) {
-    // Swallow quota errors but log to console for debugging.
-    // Consumers can choose to surface a toast based on operation result in the future.
     console.error('Failed to save StudyFlow roadmaps to localStorage', error)
   }
 }
@@ -68,16 +69,17 @@ function computeRoadmapProgress(roadmap: Roadmap): number {
   return Math.round((completed / total) * 100)
 }
 
+// --- SYNC / LOCAL STORAGE (LEGACY SUPPORT) ---
+
 export function getRoadmaps(): Roadmap[] {
   const roadmaps = readRoadmaps()
-  // Ensure totalProgress is always populated / normalized.
   return roadmaps.map((roadmap) => ({
     ...roadmap,
     totalProgress: computeRoadmapProgress(roadmap),
   }))
 }
 
-export function saveRoadmap(roadmap: Roadmap): void {
+export function saveRoadmapLocal(roadmap: Roadmap): void {
   const existing = getRoadmaps()
   const now = new Date().toISOString()
   const normalized: Roadmap = {
@@ -88,10 +90,7 @@ export function saveRoadmap(roadmap: Roadmap): void {
 
   const index = existing.findIndex((r) => r.id === roadmap.id)
   if (index === -1) {
-    // If createdAt was not set, initialize it.
-    if (!normalized.createdAt) {
-      normalized.createdAt = now
-    }
+    if (!normalized.createdAt) normalized.createdAt = now
     existing.push(normalized)
   } else {
     existing[index] = { ...existing[index], ...normalized }
@@ -100,10 +99,32 @@ export function saveRoadmap(roadmap: Roadmap): void {
   writeRoadmaps(existing)
 }
 
-export function deleteRoadmap(id: string): void {
+// --- ASYNC / SUPABASE FIRST (RECOMMENDED) ---
+
+export async function getRoadmapsAsync(): Promise<Roadmap[]> {
+  const dbData = await fetchRoadmaps()
+  if (dbData) {
+    // Sync to local as well for offline use
+    writeRoadmaps(dbData)
+    return dbData
+  }
+  return getRoadmaps()
+}
+
+export async function saveRoadmap(roadmap: Roadmap): Promise<void> {
+  // Always save local first for speed
+  saveRoadmapLocal(roadmap)
+  
+  // Try to sync with Supabase
+  await upsertRoadmap(roadmap)
+}
+
+export async function deleteRoadmap(id: string): Promise<void> {
   const existing = getRoadmaps()
   const updated = existing.filter((r) => r.id !== id)
   writeRoadmaps(updated)
+  
+  await deleteRoadmapFromDb(id)
 }
 
 export function updateVideoProgress(
@@ -135,6 +156,9 @@ export function updateVideoProgress(
 
   roadmaps[roadmapIndex] = updatedRoadmap
   writeRoadmaps(roadmaps)
+  
+  // Background sync if possible
+  upsertRoadmap(updatedRoadmap)
 }
 
 export function saveNotes(
@@ -148,12 +172,7 @@ export function saveNotes(
 
   const roadmap = roadmaps[roadmapIndex]
   const videos = roadmap.videos.map((video) =>
-    video.id === videoId
-      ? {
-          ...video,
-          notes,
-        }
-      : video,
+    video.id === videoId ? { ...video, notes } : video,
   )
 
   const updatedRoadmap: Roadmap = {
@@ -165,9 +184,34 @@ export function saveNotes(
 
   roadmaps[roadmapIndex] = updatedRoadmap
   writeRoadmaps(roadmaps)
+  
+  // Background sync
+  upsertRoadmap(updatedRoadmap)
 }
 
 export function markVideoComplete(roadmapId: string, videoId: string): void {
   updateVideoProgress(roadmapId, videoId, 100)
 }
+
+type VideoPositionMap = Record<string, number>
+
+export function getVideoPosition(videoId: string): number {
+  if (!isBrowser()) return 0
+  const raw = window.localStorage.getItem(VIDEO_POSITION_KEY)
+  const map = safeParse<VideoPositionMap>(raw, {})
+  return map[videoId] ?? 0
+}
+
+export function saveVideoPosition(videoId: string, seconds: number): void {
+  if (!isBrowser()) return
+  try {
+    const raw = window.localStorage.getItem(VIDEO_POSITION_KEY)
+    const map = safeParse<VideoPositionMap>(raw, {})
+    map[videoId] = seconds
+    window.localStorage.setItem(VIDEO_POSITION_KEY, JSON.stringify(map))
+  } catch (error) {
+    console.error('Failed to save video position', error)
+  }
+}
+
 

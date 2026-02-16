@@ -5,16 +5,18 @@ import { useSearchParams } from 'next/navigation'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import RoadmapCard from '../components/RoadmapCard'
-import { deleteRoadmap, getRoadmaps, type Roadmap } from '../../lib/storage'
-import { Trash2 } from 'lucide-react'
+import { deleteRoadmap, getRoadmapsAsync, type Roadmap } from '../../lib/storage'
+import { Trash2, Loader2, FolderSearch } from 'lucide-react'
 
 export default function RoadmapListPage() {
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get('search') || ''
 
-  useEffect(() => {
-    const allRoadmaps = getRoadmaps()
+  const fetchAll = async () => {
+    setIsLoading(true)
+    const allRoadmaps = await getRoadmapsAsync()
     if (searchQuery) {
       const lowered = searchQuery.toLowerCase()
       const filtered = allRoadmaps.filter(
@@ -26,23 +28,16 @@ export default function RoadmapListPage() {
     } else {
       setRoadmaps(allRoadmaps)
     }
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    fetchAll()
   }, [searchQuery])
 
-  const handleDelete = (id: string) => {
-    deleteRoadmap(id)
-    const allRoadmaps = getRoadmaps()
-    if (searchQuery) {
-      const lowered = searchQuery.toLowerCase()
-      setRoadmaps(
-        allRoadmaps.filter(
-          (roadmap) =>
-            roadmap.name.toLowerCase().includes(lowered) ||
-            roadmap.description.toLowerCase().includes(lowered),
-        ),
-      )
-    } else {
-      setRoadmaps(allRoadmaps)
-    }
+  const handleDelete = async (id: string) => {
+    await deleteRoadmap(id)
+    fetchAll()
   }
 
   return (
@@ -72,10 +67,20 @@ export default function RoadmapListPage() {
           </p>
         )}
 
-        {roadmaps.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-[#050505] p-8 text-sm text-gray-400">
-            No roadmaps yet. Click &quot;Create New&quot; to start building your
-            first roadmap.
+        {isLoading && roadmaps.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-40">
+            <Loader2 className="animate-spin text-blue-500 mb-4" size={32} />
+            <p className="text-sm text-gray-500 font-medium">Loading Roadmaps...</p>
+          </div>
+        ) : roadmaps.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-[#090909] py-20 px-8 text-center">
+            <div className="mb-4 rounded-full bg-white/5 p-4 text-gray-600">
+               <FolderSearch size={48} />
+            </div>
+            <h3 className="text-lg font-medium text-white">No roadmaps found</h3>
+            <p className="mt-2 max-w-xs text-sm text-gray-500">
+               {searchQuery ? `No results for "${searchQuery}"` : "Build your first study roadmap to start organizing your educational content."}
+            </p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

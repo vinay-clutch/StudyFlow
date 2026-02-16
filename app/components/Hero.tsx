@@ -1,10 +1,21 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Play, Sparkles } from 'lucide-react'
+import { Play, Sparkles, ArrowRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function Hero() {
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+  }, [])
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black pt-24">
       {/* Centered static blue blur background */}
@@ -19,7 +30,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-6xl md:text-8xl font-bold mb-6 text-balance text-white"
+          className="text-6xl md:text-8xl font-bold mb-6 text-balance text-white tracking-tighter"
         >
           StudyFlow.
         </motion.h1>
@@ -29,9 +40,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto text-balance"
+          className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto text-balance font-light leading-relaxed"
         >
-          Learn from YouTube without distractions. Build custom roadmaps, take notes, and track your progress—all in one place.
+          Master any subject from YouTube without distractions. Build custom roadmaps, take notes, and track your progress—all in one place.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -42,16 +53,23 @@ export default function Hero() {
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <Link
-            href="/dashboard"
-            className="group px-8 py-4 rounded-full font-medium transition-all duration-300 flex items-center gap-2 bg-gradient-to-r from-sky-400 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
+            href={user ? "/dashboard" : "#"}
+            onClick={(e) => {
+              if (!user) {
+                e.preventDefault()
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                alert("Please click 'Sign In' at the top to start your journey!")
+              }
+            }}
+            className="group px-8 py-4 rounded-2xl font-bold transition-all duration-300 flex items-center gap-2 bg-blue-600 text-white shadow-2xl shadow-blue-500/20 hover:bg-blue-500 hover:scale-105 active:scale-95"
           >
-            Get Started Free
-            <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            {user ? 'Go to Dashboard' : 'Get Started Free'}
+            {user ? <ArrowRight size={18} /> : <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
           </Link>
           
           <Link
             href="/watch?videoId=dQw4w9WgXcQ"
-            className="px-8 py-4 rounded-full font-medium transition-all duration-300 border border-white/20 text-white/80 hover:bg-white/5"
+            className="px-8 py-4 rounded-2xl font-bold transition-all duration-300 border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
           >
             Watch Demo
           </Link>
